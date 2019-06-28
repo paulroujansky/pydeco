@@ -25,3 +25,4 @@ This software is licensed under the `MIT license`_.
 
 .. External references:
 .. _examples: https://github.com/paulroujansky/pydeco/tree/master/examples
+.. _MIT license: http://en.wikipedia.org/wiki/MIT_License
