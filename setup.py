@@ -39,6 +39,7 @@ setup(
     url='https://github.com/paulroujansky/pydeco',
     author='Paul Roujansky',
     long_description=get_contents('README.rst'),
+    long_description_content_type='text/x-rst',
     author_email='paul@roujansky.eu',
     license='MIT',
     test_suite='pydeco.tests',
