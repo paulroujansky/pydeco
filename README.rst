@@ -10,7 +10,7 @@ See the `examples`_ section for more insight.
 Installing PyDeco
 ^^^^^^^^^^^^^^^^^
 
-To install the latest stable version of PyDeco, you can use pip_ in a terminal:
+To install the latest stable version of PyDeco, you can use pip in a terminal:
 
 .. code-block:: bash
 
@@ -26,4 +26,3 @@ This software is licensed under the `MIT license`_.
 .. External references:
 .. _examples: https://github.com/paulroujansky/pydeco/tree/master/examples
 .. _MIT license: http://en.wikipedia.org/wiki/MIT_License
-.. _PyPI: https://pypi.python.org/pypi/pydeco
