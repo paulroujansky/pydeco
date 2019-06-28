@@ -1,5 +1,16 @@
-"""Example: decorating a class with custom decorators."""
+"""
+==============================================================================
+Example: decorating specified methods of a custom class with custom decorators
+==============================================================================
+
+This example shows how to decorate methods of a custom class with custom
+decorators.
+
+"""
 from pydeco import DecorateMethods
+
+###############################################################################
+# Create custom decorators
 
 
 class Decorator1(object):
@@ -31,6 +42,9 @@ class Decorator2(object):
             return f(instance, *args, **kwargs)
         return wrapped_f
 
+###############################################################################
+# Create custom class
+
 
 class A():
     """Custom class."""
@@ -47,22 +61,34 @@ class A():
     def method_3(self, *args, **kwargs):
         print('Run method 3')
 
+###############################################################################
+# Call methods
 
+# Without decorators
+# -----------------------------------------------------------------------------
+
+# instantiate the class
 a = A()
 
+# run methods
 a.method_1()
 a.method_2()
 a.method_3()
 
-# decorate methods
+# With decorators for the respective methods
+# -----------------------------------------------------------------------------
+
+# decorate the class
 decorated_A = DecorateMethods(
     mapping={
         Decorator1(): ['method_1', 'method_2'],
         Decorator2(): ['method_1', 'method_3']
     })(A)
 
+# instantiate the class
 a = decorated_A()
 
+# run methods
 a.method_1()
 a.method_2()
 a.method_3()
