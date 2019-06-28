@@ -1,0 +1,90 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.exe
+*.o
+*.so
+*.m~
+*/*.m~
+*.asv
+*/*.asv
+*.pyc
+*/*.pyc
+*.pyo
+*.so
+*.fif
+*.tar.gz
+*.log
+*.stc
+*~
+.#*
+*.swp
+*.lprof
+*.npy
+*.fif.gz
+*.nii.gz
+*.tar.*
+*.egg*
+*.tmproj
+*.png
+*.dat
+*.bdf
+*.csv
+*.pdf
+*.mat
+
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.pkl
+*.mat
+*.pdf
+
+# Logs and databases #
+######################
+*.log
+*.sql
+
+# OS generated files #
+######################
+*/.DS_Store
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+*.orig
+
+# PyCharm
+.idea/**
+
+# sublime
+*-e
+
+# VS code
+.vscode
+
+# Pytest
+.cache
+.cache/*
+.pytest*
+
+# Jupyter Notebook
+.ipynb*
+
+# Hypothesis
+.hypothesis
