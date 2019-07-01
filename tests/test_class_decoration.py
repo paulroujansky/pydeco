@@ -76,7 +76,7 @@ def test_class_decoration(verbose=False):
     MyClass_deco = MethodsDecorator(
         mapping={
             Decorator1(name='decorator_1'): ['method_1', 'method_2'],
-            Decorator2(name='decorator_2'): ['method_1', 'method_3']
+            Decorator2(name='decorator_2'): 'method_1'
         })(MyClass)
 
     # instantiate the class
@@ -87,7 +87,7 @@ def test_class_decoration(verbose=False):
     instance.method_2()
     instance.method_3()
 
-    assert instance.cnt_dec_1 == 2 and instance.cnt_dec_2 == 2
+    assert instance.cnt_dec_1 == 2 and instance.cnt_dec_2 == 1
 
     # decorate methods
     with pytest.raises(ValueError,
