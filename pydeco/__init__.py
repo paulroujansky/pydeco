@@ -7,7 +7,7 @@
 """The main module of the `pydeco` package."""
 
 # Library modules
-from .decorator import DecorateMethods
+from .decorator import MethodsDecorator
 
 # Semi-standard module versioning.
 __version__ = '0.1'

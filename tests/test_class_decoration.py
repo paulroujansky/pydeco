@@ -1,7 +1,7 @@
 """Test class decoration."""
 import pytest
 
-from pydeco import DecorateMethods
+from pydeco import MethodsDecorator
 
 
 def test_class_decoration(verbose=False):
@@ -43,7 +43,7 @@ def test_class_decoration(verbose=False):
     # Defining custom processing class
     # -------------------------------------------------------------------------
 
-    class A():
+    class MyClass():
         """Custom class."""
 
         def __init__(self, *args, **kwargs):
@@ -62,37 +62,41 @@ def test_class_decoration(verbose=False):
     # Running tests
     # -------------------------------------------------------------------------
 
-    a = A()
+    # instantiate the class
+    instance = MyClass()
 
-    a.method_1()
-    a.method_2()
-    a.method_3()
+    # run methods
+    instance.method_1()
+    instance.method_2()
+    instance.method_3()
 
-    assert a.cnt_dec_1 == 0 and a.cnt_dec_2 == 0
+    assert instance.cnt_dec_1 == 0 and instance.cnt_dec_2 == 0
 
     # decorate methods
-    A_dec = DecorateMethods(
+    MyClass_deco = MethodsDecorator(
         mapping={
             Decorator1(name='decorator_1'): ['method_1', 'method_2'],
             Decorator2(name='decorator_2'): ['method_1', 'method_3']
-        })(A)
+        })(MyClass)
 
-    a = A_dec()
+    # instantiate the class
+    instance = MyClass_deco()
 
-    a.method_1()
-    a.method_2()
-    a.method_3()
+    # run methods
+    instance.method_1()
+    instance.method_2()
+    instance.method_3()
 
-    assert a.cnt_dec_1 == 2 and a.cnt_dec_2 == 2
+    assert instance.cnt_dec_1 == 2 and instance.cnt_dec_2 == 2
 
     # decorate methods
     with pytest.raises(ValueError,
                        match='Input class has not method "method_4"'):
-        A_dec = DecorateMethods(
+        MyClass_deco = MethodsDecorator(
             mapping={
                 Decorator1(name='decorator_1'): ['method_1', 'method_2'],
                 Decorator2(name='decorator_2'): ['method_1', 'method_4']
-            })(A)
+            })(MyClass)
 
 
 if __name__ == "__main__":

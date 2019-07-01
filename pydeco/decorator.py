@@ -5,7 +5,7 @@
 """
 
 
-class DecorateMethods(object):
+class MethodsDecorator(object):
     """Class that enables to decorate specific methods with given decorator.
 
     Parameters
