@@ -1,0 +1,19 @@
+# Disable sudo to speed up the build
+sudo: false
+
+# Set the build language to Python
+language: python
+
+# Set the python version to 3.6
+python: 3.6
+
+# command to install dependencies
+install:
+  - pip install -r requirements.txt
+# command to run tests
+script:
+  - py.test --cov=pydeco --cov-config .coveragerc
+
+# Push the results back to codecov
+after_success:
+  - codecov

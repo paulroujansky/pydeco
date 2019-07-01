@@ -21,8 +21,6 @@ import sphinx_bootstrap_theme
 import matplotlib
 matplotlib.use('agg')
 
-import pydeco  # noqa
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -34,6 +32,8 @@ import pydeco  # noqa
 curdir = os.path.dirname(__file__)
 sys.path.append(os.path.abspath(os.path.join(curdir, "..")))
 sys.path.append(os.path.abspath(os.path.join(curdir, '..', 'pydeco')))
+
+import pydeco  # noqa
 
 # -- General configuration ------------------------------------------------
 
