@@ -10,4 +10,4 @@
 from .decorator import MethodsDecorator
 
 # Semi-standard module versioning.
-__version__ = '0.1'
+__version__ = '0.2'
