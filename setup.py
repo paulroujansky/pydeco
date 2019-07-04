@@ -35,6 +35,7 @@ def get_version(*args):
 setup(
     name='pydeco',
     version=get_version('pydeco', '__init__.py'),
+    python_requires='>=3',
     description='Python Class Methods Decorator',
     url='https://github.com/paulroujansky/pydeco',
     author='Paul Roujansky',

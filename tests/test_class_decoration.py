@@ -1,7 +1,18 @@
 """Test class decoration."""
+import os
+import sys
+
 import pytest
 
 from pydeco import MethodsDecorator
+
+from pydeco.utils import PYTHON_VERSION
+
+
+def test_python_version():
+    """Test Python version."""
+    if PYTHON_VERSION < 3:
+        raise OSError('`pydeco` compatible with Python 3.0 and higher only.')
 
 
 def test_class_decoration(verbose=False):
@@ -101,4 +112,3 @@ def test_class_decoration(verbose=False):
 
 if __name__ == "__main__":
     pytest.main([__file__])
-    # test_class_decoration(verbose=True)

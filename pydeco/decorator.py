@@ -1,4 +1,4 @@
-"""Decorator for class methods.
+"""Decorator for class methods (compatible with Python 3.0 or higher).
 
 The herebelow class :class:`MethodsDecorator` enables to decorate multiple
 methods of a given class with custom decorators by simply decorating said class
@@ -46,6 +46,7 @@ class MethodsDecorator(object):
     """
 
     def __init__(self, mapping={}):
+
         self.mapping = mapping
         for decorator, methods in mapping.items():
             if not isinstance(methods, (tuple, list)):
