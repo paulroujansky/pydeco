@@ -83,9 +83,13 @@ class MethodsDecorator(object):
                         setattr(cls, method, decorator(getattr(cls, method)))
                     super(MC, cls).__init__(name, bases, dict)
 
+        global Wrapped
+
         class Wrapped(cls, metaclass=MC):
             """Wrapped class where each specified method is decorated."""
 
             pass
+
+        Wrapped.__name__ = 'Wrapped(' + cls.__name__ + ')'
 
         return Wrapped
