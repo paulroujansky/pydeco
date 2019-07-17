@@ -25,6 +25,7 @@ PyDeco
 ======
 
 This package enable to decorate any specified class methods with a passed decorator.
+The resulting wrapped class is `picklable`_.
 
 Documentation
 ^^^^^^^^^^^^^
@@ -64,3 +65,4 @@ This software is licensed under the `MIT license`_.
 .. _PyDeco documentation: https://pydeco.readthedocs.io/en/latest/
 .. _MIT license: http://en.wikipedia.org/wiki/MIT_License
 .. _Contributing guide: https://pydeco.readthedocs.io/en/latest/contributing.html
+.. _picklable: https://docs.python.org/3/library/pickle.html
