@@ -2,12 +2,12 @@
 import os
 import pickle as pkl
 import sys
+from copy import deepcopy
 
 import pytest
 
 from pydeco import MethodsDecorator
 from pydeco.utils import PYTHON_VERSION
-
 
 # Utils
 # -----------------------------------------------------------------------------
@@ -122,6 +122,36 @@ def test_class_decoration(verbose=False):
             })(MyClass)
 
 
+def test_deepcopying():
+    """Test deepcopying."""
+    # decorate methods of base class
+    MyClass_deco = MethodsDecorator(
+        mapping={
+            Decorator1(name='decorator_1'): ['method_1', 'method_2'],
+            Decorator2(name='decorator_2'): 'method_1'
+        })(MyClass)
+
+    # instantiate the decorated class
+    instance = MyClass_deco()
+    # create a deepcopy of `instance`
+    instance_2 = deepcopy(instance)
+
+    assert instance != instance_2
+
+    assert instance.cnt_dec_1 == 0 and instance.cnt_dec_2 == 0
+    assert instance_2.cnt_dec_1 == 0 and instance_2.cnt_dec_2 == 0
+
+    # run methods for `instance`
+    instance.method_1()
+    instance.method_2()
+    instance.method_3()
+
+    # check that internal variables of `instance`' have changed but not of
+    # `instance_2`
+    assert instance.cnt_dec_1 == 2 and instance.cnt_dec_2 == 1
+    assert instance_2.cnt_dec_1 == 0 and instance_2.cnt_dec_2 == 0
+
+
 def test_pickling():
     """Test pickling."""
     # decorate methods of base class
@@ -139,14 +169,18 @@ def test_pickling():
     # Load pickled module
     instance_2 = pkl.loads(tmp)
 
+    assert instance != instance_2
+
     assert instance.cnt_dec_1 == 0 and instance.cnt_dec_2 == 0
     assert instance_2.cnt_dec_1 == 0 and instance_2.cnt_dec_2 == 0
 
-    # run methods
+    # run methods for `instance`
     instance.method_1()
     instance.method_2()
     instance.method_3()
 
+    # check that internal variables of `instance`' have changed but not of
+    # `instance_2`
     assert instance.cnt_dec_1 == 2 and instance.cnt_dec_2 == 1
     assert instance_2.cnt_dec_1 == 0 and instance_2.cnt_dec_2 == 0
 
