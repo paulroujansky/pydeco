@@ -9,6 +9,7 @@ import pytest
 from pydeco import MethodsDecorator
 from pydeco.utils import PYTHON_VERSION
 
+
 # Utils
 # -----------------------------------------------------------------------------
 
