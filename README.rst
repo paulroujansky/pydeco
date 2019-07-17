@@ -46,7 +46,9 @@ Source code
 
 You can check the latest sources with the command:
 
-git clone https://github.com/paulroujansky/pydeco.git
+.. code-block:: bash
+
+    git clone https://github.com/paulroujansky/pydeco.git
 
 Contributing
 ^^^^^^^^^^^
