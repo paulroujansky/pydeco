@@ -5,6 +5,7 @@ import sys
 from copy import deepcopy
 
 import pytest
+from joblib import Parallel, delayed
 
 from pydeco import MethodsDecorator
 from pydeco.utils import PYTHON_VERSION
@@ -26,7 +27,7 @@ class Decorator1(object):
         """Call."""
         def wrapped_f(instance, *args, **kwargs):
             """Wrap input instance method with runtime measurement."""
-            print('[Decorator 1] -> decorating...')
+            # print('[Decorator 1] -> decorating...')
             instance.cnt_dec_1 += 1  # updating instance cnt for decorator
             return f(instance, *args, **kwargs)
         return wrapped_f
@@ -42,7 +43,7 @@ class Decorator2(object):
         """Call."""
         def wrapped_f(instance, *args, **kwargs):
             """Wrap input instance method with runtime measurement."""
-            print('[Decorator 2] -> decorating...')
+            # print('[Decorator 2] -> decorating...')
             instance.cnt_dec_2 += 1  # updating instance cnt for decorator
             return f(instance, *args, **kwargs)
         return wrapped_f
@@ -59,16 +60,50 @@ class MyClass():
         self.cnt_dec_2 = 0
 
     def method_1(self, *args, **kwargs):
-        print('Run method 1')
+        # print('Run method 1')
+        pass
 
     def method_2(self, *args, **kwargs):
-        print('Run method 2')
+        # print('Run method 2')
+        pass
 
     def method_3(self, *args, **kwargs):
-        print('Run method 3')
+        # print('Run method 3')
+        pass
 
     def __repr__(self):
-        return '{}'.format(self.__class__.__name__)
+        return '{}(cnt_dec_1={}, cnt_dec_1={})'.format(
+            self.__class__.__name__, self.cnt_dec_1, self.cnt_dec_2)
+
+
+# Define custom function
+# ----------------------
+
+def myfunc(i, instance, copy, verbose=True):
+    """In the title."""
+    # keep track of iterations within each PID
+    pid = os.getpid()  # get current process ID
+    if pid not in iter_process:
+        iter_process[pid] = 0
+
+    if verbose:
+        print('Iter {}: PID={}\n'.format(i + 1, pid))
+
+    assert (instance.cnt_dec_1 == iter_process[pid] * 2 and
+            instance.cnt_dec_2 == iter_process[pid])
+
+    # run methods
+    instance.method_1()
+    instance.method_2()
+    instance.method_3()
+
+    assert (instance.cnt_dec_1 == (iter_process[pid] + 1) * 2 and
+            instance.cnt_dec_2 == iter_process[pid] + 1)
+
+    # increment iter within current PID
+    iter_process[pid] += 1
+
+    return
 
 
 # Tests
@@ -85,7 +120,7 @@ def test_class_decoration(verbose=False):
     # instantiate the class
     instance = MyClass()
 
-    assert repr(instance) == 'MyClass'
+    assert repr(instance) == 'MyClass(cnt_dec_1=0, cnt_dec_1=0)'
 
     # run methods
     instance.method_1()
@@ -104,13 +139,14 @@ def test_class_decoration(verbose=False):
     # instantiate the class
     instance = MyClass_deco()
 
-    assert repr(instance) == 'Wrapped(MyClass)'
+    assert repr(instance) == 'Wrapped(MyClass)(cnt_dec_1=0, cnt_dec_1=0)'
 
     # run methods
     instance.method_1()
     instance.method_2()
     instance.method_3()
 
+    assert repr(instance) == 'Wrapped(MyClass)(cnt_dec_1=2, cnt_dec_1=1)'
     assert instance.cnt_dec_1 == 2 and instance.cnt_dec_2 == 1
 
     # decorate methods
@@ -192,6 +228,55 @@ def test_pickling():
 
     assert instance.cnt_dec_1 == 2 and instance.cnt_dec_2 == 1
     assert instance_2.cnt_dec_1 == 2 and instance_2.cnt_dec_2 == 1
+
+
+@pytest.mark.parametrize(argnames='copy', argvalues=(True, False))
+@pytest.mark.parametrize(argnames='n_jobs', argvalues=(1, 2, 3))
+@pytest.mark.parametrize(argnames='n_iter', argvalues=(10, 20, 30))
+def test_parallelizing(copy, n_jobs, n_iter, verbose=True):
+    """Test parallelizing."""
+    # store number of iterations for each process
+    global iter_process
+    iter_process = dict()
+
+    # decorate methods of base class
+    MyClass_deco = MethodsDecorator(
+        mapping={
+            Decorator1(name='decorator_1'): ['method_1', 'method_2'],
+            Decorator2(name='decorator_2'): 'method_1'
+        })(MyClass)
+
+    # instantiate the decorated class
+    instance = MyClass_deco()
+
+    # create a "reference" instance
+    instance_ref = deepcopy(instance)
+
+    # run parallel jobs
+    if verbose:
+        print('Parallelizing: {} iterations distributed on {} jobs'.format(
+            n_iter, n_jobs))
+
+    backend = 'multiprocessing' if copy else 'threading'
+    print(copy, type(copy), backend)
+
+    with Parallel(n_jobs=n_jobs,
+                  verbose=verbose,
+                  pre_dispatch=True,
+                  backend=backend) as parallel:
+        _ = parallel(
+            delayed(myfunc)(i, instance, copy=copy, verbose=verbose)
+            for i in range(n_iter)
+        )
+
+    # check that instance has not changed if copy is True
+    if copy and n_jobs > 1:
+        assert instance.cnt_dec_1 == 0 and instance.cnt_dec_2 == 0
+    else:
+        assert (instance.cnt_dec_1 == (n_iter * 2) and
+                instance.cnt_dec_2 == n_iter)
+    # check that reference instance has not changed
+    assert instance_ref.cnt_dec_1 == 0 and instance_ref.cnt_dec_2 == 0
 
 
 if __name__ == "__main__":
