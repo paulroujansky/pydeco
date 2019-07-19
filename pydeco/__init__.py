@@ -7,7 +7,7 @@
 """The main module of the `pydeco` package."""
 
 # Library modules
-from .decorator import MethodsDecorator
+from .decorator import Decorator, MethodsDecorator
 from .utils import PYTHON_VERSION
 
 # Semi-standard module versioning.

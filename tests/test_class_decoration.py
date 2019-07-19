@@ -231,9 +231,8 @@ def test_pickling():
 
 
 @pytest.mark.parametrize(argnames='copy', argvalues=(True, False))
-@pytest.mark.parametrize(argnames='n_jobs', argvalues=(1, 2, 3))
 @pytest.mark.parametrize(argnames='n_iter', argvalues=(10, 20, 30))
-def test_parallelizing(copy, n_jobs, n_iter, verbose=True):
+def test_parallelizing(copy, n_iter, n_jobs=1, verbose=True):
     """Test parallelizing."""
     # store number of iterations for each process
     global iter_process
