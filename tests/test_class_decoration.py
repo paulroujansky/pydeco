@@ -107,13 +107,7 @@ def myfunc(i, instance, copy, verbose=True):
 
 
 # Tests
-# -----------------------------------------------------------------------------
-
-def test_python_version():
-    """Test Python version."""
-    if PYTHON_VERSION < 3:
-        raise OSError('`pydeco` compatible with Python 3.0 and higher only.')
-
+# ----------------------------------------------------------------------------
 
 def test_class_decoration(verbose=False):
     """Test class decoration."""

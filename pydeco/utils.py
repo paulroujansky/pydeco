@@ -2,6 +2,9 @@
 import os
 import sys
 from ast import literal_eval
+from inspect import isclass
+
+import decorator
 
 
 def python_version():
@@ -15,6 +18,13 @@ def python_version():
         py_version = float(version_info.major + version_info.minor / 10)
 
     return py_version
+
+
+def is_wrapped(obj):
+    """Return True if input object is wrapped."""
+    cls = obj if isclass(obj) else obj.__class__
+
+    return getattr(cls, '_MC__decorated', False)
 
 
 PYTHON_VERSION = python_version()

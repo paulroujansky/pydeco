@@ -9,6 +9,8 @@ decorate which methods.
 from functools import wraps
 from abc import abstractmethod
 
+from .utils import is_wrapped
+
 
 class Decorator(object):
     """Decorator base class."""
@@ -37,7 +39,10 @@ class Decorator(object):
             err = ('Current decorator does not decorate a method of input '
                    'class instance.')
             raise ValueError(err)
-        return instance.is_decorator_active(self.__class__.__name__)
+        if is_wrapped(instance):
+            return True
+        else:
+            return instance.is_decorator_active(self.__class__.__name__)
 
     def __call__(self, func):
         """Call."""
@@ -124,8 +129,8 @@ class MethodsDecorator(object):
 
             def __init__(cls, name, bases, dict):
 
-                cls.decorated = True  # indicates that the class is decorated
-                cls.wrapper = self.__class__  # type of class decorator
+                cls.__decorated = True  # indicates that the class is decorated
+                cls.__wrapper = self.__class__  # type of class decorator
                 cls.__decorator_mapping = self.mapping
                 cls.decorators = {
                     decorator.__class__.__name__: decorator
@@ -142,15 +147,15 @@ class MethodsDecorator(object):
 
                 super(MC, cls).__init__(name, bases, dict)
 
-        global Wrapped
+        global Wrapper
 
-        class Wrapped(cls, metaclass=MC):
+        class Wrapper(cls, metaclass=MC):
             """Wrapped class where each specified method is decorated."""
 
             def __init__(self, *args, **kwargs):
                 self.active_decorators = \
                     {decorator: True for decorator in self.decorators}
-                super(Wrapped, self).__init__(*args, **kwargs)
+                cls.__init__(self, *args, **kwargs)
 
             def _check_decorator_name(self, name):
                 if name not in self.decorators:
@@ -175,7 +180,7 @@ class MethodsDecorator(object):
                 self.active_decorators[name] = False
 
         # Updating wrapped class name and documentation
-        Wrapped.__name__ = 'Wrapped(' + cls.__name__ + ')'
-        Wrapped.__doc__ = cls.__doc__
+        Wrapper.__name__ = 'Wrapped(' + cls.__name__ + ')'
+        Wrapper.__doc__ = cls.__doc__
 
-        return Wrapped
+        return Wrapper
