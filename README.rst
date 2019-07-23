@@ -51,7 +51,7 @@ You can check the latest sources with the command:
     git clone https://github.com/paulroujansky/pydeco.git
 
 Contributing
-^^^^^^^^^^^
+^^^^^^^^^^^^
 
 To learn more about making a contribution to PyDeco, please see the `Contributing guide`_.
 

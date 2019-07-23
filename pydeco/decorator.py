@@ -18,6 +18,10 @@ class Decorator(object):
     def __init__(self, *args, **kwargs):
         self.instances = []
 
+    def flush_instances(self):
+        """Flush instances."""
+        self.instances = []
+
     @abstractmethod
     def wrapper(self, instance, func, *args, **kwargs):
         """Wrap func."""
@@ -141,14 +145,6 @@ class MethodsDecorator(object):
 
             def __init__(cls, name, bases, dict):
 
-                cls.__decorated = True  # indicates that the class is decorated
-                cls.__wrapper = self.__class__  # type of class decorator
-                cls.__decorator_mapping = self.mapping
-                cls.decorators = {
-                    decorator.__class__.__name__: decorator
-                    for decorator in self.mapping.keys()
-                }
-
                 for decorator, methods in self.mapping.items():
                     for method in methods:
                         if not hasattr(cls, method):
@@ -163,6 +159,16 @@ class MethodsDecorator(object):
 
         class Wrapper(cls, metaclass=MC):
             """Wrapped class where each specified method is decorated."""
+
+            # wrapped class
+            __wrapped_class = cls
+            __decorated = True  # indicates that the class is decorated
+            __wrapper = self.__class__  # type of class decorator
+            __decorator_mapping = self.mapping
+            decorators = {
+                decorator.__class__.__name__: decorator
+                for decorator in self.mapping.keys()
+            }
 
             def __init__(self, *args, **kwargs):
                 self.active_decorators = \

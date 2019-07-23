@@ -22,7 +22,14 @@ def is_wrapped(obj):
     """Return True if input object is wrapped."""
     cls = obj if isclass(obj) else obj.__class__
 
-    return getattr(cls, '_MC__decorated', False)
+    return getattr(cls, '_Wrapper__decorated', False)
+
+
+def wrapped_class(obj):
+    """Return wrapped class if object is wrapped, `cls` otherwise."""
+    cls = obj if isclass(obj) else obj.__class__
+
+    return getattr(cls, '_Wrapper__wrapped_class', cls)
 
 
 PYTHON_VERSION = python_version()
