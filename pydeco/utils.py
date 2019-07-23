@@ -4,8 +4,6 @@ import sys
 from ast import literal_eval
 from inspect import isclass
 
-import decorator
-
 
 def python_version():
     """Return Python version."""
