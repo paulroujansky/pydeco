@@ -39,7 +39,7 @@ class Decorator(object):
             err = ('Current decorator does not decorate a method of input '
                    'class instance.')
             raise ValueError(err)
-        if is_wrapped(instance):
+        if not is_wrapped(instance):
             return True
         else:
             return instance.is_decorator_active(self.__class__.__name__)
@@ -47,13 +47,23 @@ class Decorator(object):
     def __call__(self, func):
         """Call."""
         @wraps(func)
-        def _wrapped_func(instance, *args, **kwargs):
+        def _wrapped_func(instance, func, *args, **kwargs):
             """Call wrapper is decorator is active, otherwise call func."""
             if instance not in self.instances:
                 self.instances.append(instance)
+
             if self.is_active(instance):
                 # active decorator for the current func: wrap it
-                return self.wrapper(instance, func, *args, **kwargs)
+                # check if input is a bound method or not
+                if hasattr(func, '__self__'):
+
+                    # wrap func as it is a bound method
+                    def func_(instance, *args, **kwargs):
+                        return func(*args, **kwargs)
+
+                    return self.wrapper(instance, func_, *args, **kwargs)
+                else:
+                    return self.wrapper(instance, func, *args, **kwargs)
             else:
                 # inactive decorator for the current func
                 return func(instance, *args, **kwargs)
@@ -62,8 +72,10 @@ class Decorator(object):
             # input object is a method of an instance
             instance = func.__self__
             return lambda *args, **kwargs: \
-                _wrapped_func(instance, *args, **kwargs)
-        return _wrapped_func
+                _wrapped_func(instance, func, *args, **kwargs)
+        else:
+            return lambda instance, *args, **kwargs: \
+                _wrapped_func(instance, func, *args, **kwargs)
 
 
 class MethodsDecorator(object):
