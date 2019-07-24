@@ -167,7 +167,12 @@ def test_deepcopying():
     # create a deepcopy of `instance`
     instance_2 = deepcopy(instance)
 
-    assert instance != instance_2
+    # check that `instance` and `instance_2` are distinct objects
+    assert instance is not instance_2
+    # check that decorators of `instance` and `instance_2` are distinct objects
+    for (deco1_name, deco1), (deco2_name, deco2) in zip(
+            instance.decorators.items(), instance_2.decorators.items()):
+        assert deco1 is not deco2
 
     assert instance.cnt_dec_1 == 0 and instance.cnt_dec_2 == 0
     assert instance_2.cnt_dec_1 == 0 and instance_2.cnt_dec_2 == 0
@@ -200,7 +205,12 @@ def test_pickling():
     # Load pickled module
     instance_2 = pkl.loads(tmp)
 
-    assert instance != instance_2
+    # check that `instance` and `instance_2` are distinct objects
+    assert instance is not instance_2
+    # check that decorators of `instance` and `instance_2` are distinct objects
+    for (deco1_name, deco1), (deco2_name, deco2) in zip(
+            instance.decorators.items(), instance_2.decorators.items()):
+        assert deco1 is not deco2
 
     assert instance.cnt_dec_1 == 0 and instance.cnt_dec_2 == 0
     assert instance_2.cnt_dec_1 == 0 and instance_2.cnt_dec_2 == 0
@@ -251,7 +261,6 @@ def test_parallelizing(copy, n_iter, n_jobs=1, verbose=True):
             n_iter, n_jobs))
 
     backend = 'multiprocessing' if copy else 'threading'
-    print(copy, type(copy), backend)
 
     with Parallel(n_jobs=n_jobs,
                   verbose=verbose,
@@ -273,4 +282,4 @@ def test_parallelizing(copy, n_iter, n_jobs=1, verbose=True):
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+   pytest.main([__file__])

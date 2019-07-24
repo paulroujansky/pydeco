@@ -131,6 +131,8 @@ class MethodsDecorator(object):
 
     def __call__(self, cls):
         """Return wrapped input class with decorated methods."""
+        mapping = self.mapping
+
         class MC(type):
             """Decorating methods for the input class with given decorator.
 
@@ -160,17 +162,16 @@ class MethodsDecorator(object):
         class Wrapper(cls, metaclass=MC):
             """Wrapped class where each specified method is decorated."""
 
-            # wrapped class
-            __wrapped_class = cls
+            __wrapped_class = cls  # base class
             __decorated = True  # indicates that the class is decorated
             __wrapper = self.__class__  # type of class decorator
-            __decorator_mapping = self.mapping
-            decorators = {
-                decorator.__class__.__name__: decorator
-                for decorator in self.mapping.keys()
-            }
+            __decorator_mapping = mapping  # decorator mapping
 
             def __init__(self, *args, **kwargs):
+                self.decorators = {
+                    decorator.__class__.__name__: decorator
+                    for decorator in mapping.keys()
+                }
                 self.active_decorators = \
                     {decorator: True for decorator in self.decorators}
                 cls.__init__(self, *args, **kwargs)
