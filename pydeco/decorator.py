@@ -50,8 +50,7 @@ class Decorator(object):
 
     def __call__(self, func):
         """Call."""
-        @wraps(func)
-        def _wrapped_func(instance, func, *args, **kwargs):
+        def wrapped_func(instance, func, *args, **kwargs):
             """Call wrapper is decorator is active, otherwise call func."""
             if instance not in self.instances:
                 self.instances.append(instance)
@@ -75,11 +74,17 @@ class Decorator(object):
         if hasattr(func, '__self__'):
             # input object is a method of an instance
             instance = func.__self__
-            return lambda *args, **kwargs: \
-                _wrapped_func(instance, func, *args, **kwargs)
+
+            @wraps(func)
+            def _wrapped_func(*args, **kwargs):
+                return wrapped_func(instance, func, *args, **kwargs)
+            return _wrapped_func
+
         else:
-            return lambda instance, *args, **kwargs: \
-                _wrapped_func(instance, func, *args, **kwargs)
+            @wraps(func)
+            def _wrapped_func(instance, *args, **kwargs):
+                return wrapped_func(instance, func, *args, **kwargs)
+            return _wrapped_func
 
 
 class MethodsDecorator(object):
