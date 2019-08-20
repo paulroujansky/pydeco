@@ -11,4 +11,4 @@ from .decorator import Decorator, MethodsDecorator
 from .utils.misc import PYTHON_VERSION
 
 # Semi-standard module versioning.
-__version__ = '0.34'
+__version__ = '0.35'
