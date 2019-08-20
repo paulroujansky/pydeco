@@ -42,7 +42,7 @@ class Timer(Decorator):
         ts = time.time()
 
         # call `func` on inputs
-        result = func(instance, *args, **kwargs)
+        outs = func(instance, *args, **kwargs)
 
         # compute elapsed time
         te = time.time()
@@ -53,7 +53,7 @@ class Timer(Decorator):
         print('[Log] runtime {!r} : {:2.2f} ms'.format(func.__name__, runtime))
 
         # return outputs of `func`
-        return result
+        return outs
 
 
 ###############################################################################

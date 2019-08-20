@@ -7,40 +7,34 @@ This example shows how to decorate methods of a custom class with custom
 decorators.
 
 """
-from pydeco import MethodsDecorator
+from pydeco import Decorator, MethodsDecorator
 
 ###############################################################################
 # Create custom decorators
 
 
-class Decorator1(object):
+class Decorator1(Decorator):
     """Decorator 1."""
 
     def __init__(self, *args, **kwargs):
-        pass
+        Decorator.__init__(self, *args, **kwargs)
 
-    def __call__(self, f):
-        """Call function."""
-        def wrapped_f(instance, *args, **kwargs):
-            """Wrap input instance method with the herebelow code."""
-            print('[Decorator 1] -> decorating...')
-            return f(instance, *args, **kwargs)
-        return wrapped_f
+    def wrapper(self, instance, func, *args, **kwargs):
+        """Wrap input instance method with the herebelow code."""
+        print('[Decorator 1] -> decorating...')
+        return func(instance, *args, **kwargs)
 
 
-class Decorator2(object):
+class Decorator2(Decorator):
     """Decorator 2."""
 
     def __init__(self, *args, **kwargs):
-        pass
+        Decorator.__init__(self, *args, **kwargs)
 
-    def __call__(self, f):
-        """Call function."""
-        def wrapped_f(instance, *args, **kwargs):
-            """Wrap input instance method with the herebelow code."""
-            print('[Decorator 2] -> decorating...')
-            return f(instance, *args, **kwargs)
-        return wrapped_f
+    def wrapper(self, instance, func, *args, **kwargs):
+        """Wrap input instance method with the herebelow code."""
+        print('[Decorator 2] -> decorating...')
+        return func(instance, *args, **kwargs)
 
 ###############################################################################
 # Create custom class

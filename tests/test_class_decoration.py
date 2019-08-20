@@ -7,7 +7,7 @@ from copy import deepcopy
 import pytest
 from joblib import Parallel, delayed
 
-from pydeco import MethodsDecorator
+from pydeco import Decorator, MethodsDecorator
 from pydeco.decorator import unregister, unregister_all
 from pydeco.utils import PYTHON_VERSION
 
@@ -21,56 +21,49 @@ logs = []
 # Defining custom func decorators
 # -------------------------------
 
-class Decorator1(object):
+
+class Decorator1(Decorator):
     """Decorator 1."""
 
     def __init__(self, name, *args, **kwargs):
         self.name = name
+        Decorator.__init__(self)
 
     def __repr__(self):
         """Return the string representation."""
         return '{} (id={})'.format(self.__class__.__name__, id(self))
 
-    def __call__(self, f):
-        """Call."""
-        def wrapped_f(instance, *args, **kwargs):
-            """Wrap input instance method with runtime measurement."""
-            print('Wrapped_f: {} , instance: {} ({})'.format(
-                repr(self), repr(instance), id(instance)))
-            logs.append({
-                self.__class__.__name__: id(self),
-                instance.__class__.__name__: id(instance)
-            })
-            # print('[Decorator 1] -> decorating...')
-            instance.cnt_dec_1 += 1  # updating instance cnt for decorator
-            return f(instance, *args, **kwargs)
-        return wrapped_f
+    def wrapper(self, instance, func, *args, **kwargs):
+        """Wrap input instance method with runtime measurement."""
+        logs.append({
+            self.__class__.__name__: id(self),
+            instance.__class__.__name__: id(instance)
+        })
+        # print('[Decorator 1] -> decorating...')
+        instance.cnt_dec_1 += 1  # updating instance cnt for decorator
+        return func(instance, *args, **kwargs)
 
 
-class Decorator2(object):
+class Decorator2(Decorator):
     """Decorator 2."""
 
     def __init__(self, name, *args, **kwargs):
         self.name = name
+        Decorator.__init__(self)
 
     def __repr__(self):
         """Return the string representation."""
         return '{} (id={})'.format(self.__class__.__name__, id(self))
 
-    def __call__(self, f):
-        """Call."""
-        def wrapped_f(instance, *args, **kwargs):
-            """Wrap input instance method with runtime measurement."""
-            print('Wrapped_f: {} , instance: {} ({})'.format(
-                repr(self), repr(instance), id(instance)))
-            logs.append({
-                self.__class__.__name__: id(self),
-                instance.__class__.__name__: id(instance)
-            })
-            # print('[Decorator 2] -> decorating...')
-            instance.cnt_dec_2 += 1  # updating instance cnt for decorator
-            return f(instance, *args, **kwargs)
-        return wrapped_f
+    def wrapper(self, instance, func, *args, **kwargs):
+        """Wrap input instance method with runtime measurement."""
+        logs.append({
+            self.__class__.__name__: id(self),
+            instance.__class__.__name__: id(instance)
+        })
+        # print('[Decorator 1] -> decorating...')
+        instance.cnt_dec_2 += 1  # updating instance cnt for decorator
+        return func(instance, *args, **kwargs)
 
 
 # Defining custom processing class
