@@ -25,4 +25,5 @@ specified class methods.
     :toctree: generated
     :template: class.rst
 
+    Decorator
     MethodsDecorator
