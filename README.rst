@@ -1,7 +1,12 @@
 .. -*- mode: rst -*-
 
+|PyPi|_ |Documentation|_ |Travis|_ |Circle|_ |Codecov|_ |Python36|_ |Downloads|_ |License MIT|_
 
-|Travis|_ |Circle|_ |Codecov|_ |PyPi|_ |License MIT|_
+.. |PyPi| image:: https://badge.fury.io/py/pydeco.svg
+.. _PyPi: https://badge.fury.io/py/pydeco
+
+.. |Documentation| image:: https://readthedocs.org/projects/pydeco/badge/?version=latest
+.. _Documentation: https://pydeco.readthedocs.io/en/latest/?badge=latest
 
 .. |Travis| image:: https://api.travis-ci.org/paulroujansky/pydeco.png?branch=master
 .. _Travis: https://travis-ci.org/paulroujansky/pydeco/branches
@@ -12,11 +17,11 @@
 .. |Codecov| image:: https://codecov.io/gh/paulroujansky/pydeco/branch/master/graph/badge.svg
 .. _Codecov: https://codecov.io/gh/paulroujansky/pydeco
 
-.. |Python35| image:: https://img.shields.io/badge/python-3.5-blue.svg
-.. _Python35: https://badge.fury.io/py/scikit-learn
+.. |Python36| image:: https://img.shields.io/badge/python-3.6-blue.svg
+.. _Python36: https://badge.fury.io/py/pydeco
 
-.. |PyPi| image:: https://badge.fury.io/py/pydeco.svg
-.. _PyPi: https://badge.fury.io/py/pydeco
+.. |Downloads| image:: https://pepy.tech/badge/pydeco
+.. _Downloads: https://pepy.tech/project/pydeco
 
 .. |License MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
 .. _License MIT: https://opensource.org/licenses/MIT

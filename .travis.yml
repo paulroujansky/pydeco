@@ -14,6 +14,22 @@ matrix:
           os: linux
           python: 3.7
           dist: xenial
+        - name: "Python 3.6 on Windows"
+          os: windows
+          language: sh
+          python: "3.6"
+          before_install:
+              - choco install python3 --version 3.6.7
+              - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
+              - python -m pip install --upgrade pip wheel
+        - name: "Python 3.7 on Windows"
+          os: windows
+          language: sh
+          python: "3.7"
+          before_install:
+              - choco install python3
+              - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
+              - python -m pip install --upgrade pip wheel
 
 # Command to install dependencies
 install:
