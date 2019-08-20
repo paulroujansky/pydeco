@@ -2,8 +2,7 @@
 import pytest
 
 from pydeco import Decorator, MethodsDecorator
-from pydeco.decorator import get_registered_wrappers_classnames
-from pydeco.utils import PYTHON_VERSION, is_wrapped
+from pydeco.utils import PYTHON_VERSION, is_wrapped, wrapped_class
 
 
 # Utils
@@ -111,6 +110,26 @@ def test_is_wrapped():
     assert is_wrapped(MyClass_deco)
     # check that :class:`MyClass_deco` instance `instance_2` is wrapped
     assert is_wrapped(instance_2)
+
+
+def test_wrapped_class():
+    """Test `wrapped_class` function."""
+    # instantiate the base class
+    instance = MyClass()
+
+    assert wrapped_class(instance) is MyClass
+
+    # decorate methods
+    MyClass_deco = MethodsDecorator(
+        mapping={
+            Decorator1(name='decorator_1'): ['method_1', 'method_2'],
+            Decorator2(name='decorator_2'): 'method_1'
+        })(MyClass)
+
+    # instantiate the wrapped class
+    instance_2 = MyClass_deco()
+
+    assert wrapped_class(instance_2) is MyClass
 
 
 if __name__ == "__main__":
