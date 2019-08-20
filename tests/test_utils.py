@@ -1,6 +1,8 @@
 """Test utils."""
 import pytest
+
 from pydeco import Decorator, MethodsDecorator
+from pydeco.decorator import get_registered_wrappers_classnames
 from pydeco.utils import PYTHON_VERSION, is_wrapped
 
 

@@ -6,10 +6,61 @@ with it. One then needs to specify, as a dictionary, which decorator is used to
 decorate which methods.
 
 """
-from functools import wraps
+import logging
+import re
 from abc import abstractmethod
+from copy import deepcopy
+from functools import wraps
 
 from .utils import is_wrapped
+
+
+def register(cls):
+    """Register class."""
+    classname = cls.__name__
+    if classname in globals() and 'Wrapped(' not in classname:
+        raise ValueError('{} is already a registered class.'.format(classname))
+    globals()[classname] = cls
+
+
+def unregister(cls):
+    """Unregister class."""
+    classname = cls if isinstance(cls, str) else cls.__name__
+    if classname in globals():
+        globals().pop(classname)
+    else:
+        logging.warning('{} is not a registered class'.format(classname))
+
+
+def unregister_all():
+    """Unregister all classes."""
+    for classname in get_registered_wrappers_classnames():
+        unregister(classname)
+
+
+def get_registered_wrappers_classnames():
+    """Get classnames of all registered wrappers."""
+    return list(set([k for k in globals() if 'Wrapped' in k]))
+
+
+def make_wrapper_classname(classname):
+    """Return new wrapper classname based on registered classes."""
+    registered_wrappers = get_registered_wrappers_classnames()
+    searches = [re.search(r'Wrapped([0-9]*)\((.*)\)', elt)
+                for elt in registered_wrappers]
+    nums = [search.groups()[0] for search in searches
+            if search is not None and search.groups() is not None]
+    if len(nums) == 0:
+        wrapper_classname = 'Wrapped({})'.format(classname)
+    else:
+        if len(nums) == 1 and nums[0] == '':
+            max_num = 2
+            wrapper_classname = 'Wrapped{}({})'.format(max_num, classname)
+        else:
+            nums = [int(num) for num in nums if num != '']
+            max_num = sorted(nums)[-1] + 1
+            wrapper_classname = 'Wrapped{}({})'.format(max_num, classname)
+    return wrapper_classname
 
 
 class Decorator(object):
@@ -133,10 +184,12 @@ class MethodsDecorator(object):
             assert callable(decorator)
             assert all([isinstance(method, str) for method in methods])
             self.mapping[decorator] = methods
+        self.original_methods = dict()
 
     def __call__(self, cls):
         """Return wrapped input class with decorated methods."""
         mapping = self.mapping
+        original_methods = self.original_methods
 
         class MC(type):
             """Decorating methods for the input class with given decorator.
@@ -150,17 +203,21 @@ class MethodsDecorator(object):
 
             """
 
-            def __init__(cls, name, bases, dict):
-
+            def __init__(cls_, name, bases, dict):
                 for decorator, methods in self.mapping.items():
                     for method in methods:
-                        if not hasattr(cls, method):
+                        if not hasattr(cls_, method):
                             err = 'Input class has not method "{}"'.format(
                                 method)
                             raise ValueError(err)
-                        setattr(cls, method, decorator(getattr(cls, method)))
+                        if method not in self.original_methods:
+                            self.original_methods[method] = (
+                                getattr(cls_, method)
+                            )
+                        setattr(cls_, method,
+                                decorator(getattr(cls_, method)))
 
-                super(MC, cls).__init__(name, bases, dict)
+                super(MC, cls_).__init__(name, bases, dict)
 
         global Wrapper
 
@@ -171,15 +228,96 @@ class MethodsDecorator(object):
             __decorated = True  # indicates that the class is decorated
             __wrapper = self.__class__  # type of class decorator
             __decorator_mapping = mapping  # decorator mapping
+            __original_methods = original_methods
 
             def __init__(self, *args, **kwargs):
-                self.decorators = {
-                    decorator.__class__.__name__: decorator
-                    for decorator in mapping.keys()
+                self._decorator_mapping = {
+                    k: v for k, v in self.__decorator_mapping.items()
                 }
-                self.active_decorators = \
-                    {decorator: True for decorator in self.decorators}
+                self.active_decorators = {
+                    decorator: True for decorator in self.decorators
+                }
                 cls.__init__(self, *args, **kwargs)
+
+            @property
+            def decorators(self):
+                """Return decorators."""
+                return {
+                    decorator.__class__.__name__: decorator
+                    for decorator in self._decorator_mapping.keys()
+                }
+
+            def __deepcopy__(self, memo=None, _nil=[]):
+                """Deepcopy."""
+                # Remove decorators from self
+                cls_self = self.__class__
+                tmp_methods = dict()
+                tmp_mapping = dict()
+                tmp_active_decorators = dict()
+
+                for decorator, methods in self._decorator_mapping.items():
+                    tmp_mapping[decorator] = methods
+                for decorator, is_active in self.active_decorators.items():
+                    tmp_active_decorators[decorator] = is_active
+
+                self._decorator_mapping = dict()
+                self.active_decorators = dict()
+
+                for method_name, method in self.__original_methods.items():
+                    tmp_methods[method_name] = method
+                    delattr(cls_self, method_name)
+
+                # Copy self
+                c_self = cls_self.__new__(cls_self)
+                memo[id(self)] = c_self
+                for k, v in self.__dict__.items():
+                    setattr(c_self, k, deepcopy(v, memo))
+
+                new_wrapper_classname = make_wrapper_classname(cls.__name__)
+
+                # Copy self's Wrapper
+                cls_c_self = type(new_wrapper_classname,
+                                  c_self.__class__.__bases__,
+                                  dict(c_self.__class__.__dict__))
+                register(cls_c_self)
+                c_self.__class__ = cls_c_self
+
+                # Add back decorators to both self and its copy
+                for method_name, method in tmp_methods.items():
+                    setattr(cls_self, method_name, method)
+                    setattr(cls_c_self, method_name, method)
+
+                for decorator, methods in tmp_mapping.items():
+                    decorator_name = decorator.__class__.__name__
+                    c_decorator = deepcopy(decorator)
+                    self._decorator_mapping[decorator] = methods
+                    c_self._decorator_mapping[c_decorator] = methods
+
+                    is_decorator_active = (
+                        tmp_active_decorators[decorator_name]
+                    )
+                    self.active_decorators[decorator_name] = (
+                        is_decorator_active)
+                    c_self.active_decorators[decorator_name] = (
+                        is_decorator_active)
+
+                    for method_name in methods:
+                        if not hasattr(self, method_name):
+                            err = 'Input class has not method "{}"'.format(
+                                method_name)
+                            raise ValueError(err)
+                        setattr(
+                            cls_self, method_name,
+                            decorator(getattr(cls_self, method_name)))
+                        if not hasattr(c_self, method_name):
+                            err = 'Input class has not method "{}"'.format(
+                                method_name)
+                            raise ValueError(err)
+                        setattr(
+                            cls_c_self, method_name,
+                            c_decorator(getattr(cls_c_self, method_name)))
+                # return copy
+                return c_self
 
             def _check_decorator_name(self, name):
                 if name not in self.decorators:
@@ -204,7 +342,9 @@ class MethodsDecorator(object):
                 self.active_decorators[name] = False
 
         # Updating wrapped class name and documentation
-        Wrapper.__name__ = 'Wrapped(' + cls.__name__ + ')'
+        Wrapper.__name__ = make_wrapper_classname(cls.__name__)
         Wrapper.__doc__ = cls.__doc__
+
+        register(Wrapper)
 
         return Wrapper
