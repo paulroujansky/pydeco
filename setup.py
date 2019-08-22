@@ -46,7 +46,7 @@ setup(
     test_suite='pydeco.tests',
     install_requires=requirements,
     packages=find_packages(exclude=exclude),
-    data_files=[('config', ['config.yml'])],
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
