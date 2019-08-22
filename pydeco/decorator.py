@@ -12,55 +12,14 @@ from abc import abstractmethod
 from copy import deepcopy
 from functools import wraps
 
-from .utils import is_wrapped
+from .utils import CONFIG, is_wrapped
 
+global shared_wrappers
+shared_wrappers = globals()
 
-def register(cls):
-    """Register class."""
-    classname = cls.__name__
-    if classname in globals() and 'Wrapped(' not in classname:
-        raise ValueError('{} is already a registered class.'.format(classname))
-    globals()[classname] = cls
-
-
-def unregister(cls):
-    """Unregister class."""
-    classname = cls if isinstance(cls, str) else cls.__name__
-    if classname in globals():
-        globals().pop(classname)
-    else:
-        logging.warning('{} is not a registered class'.format(classname))
-
-
-def unregister_all():
-    """Unregister all classes."""
-    for classname in get_registered_wrappers_classnames():
-        unregister(classname)
-
-
-def get_registered_wrappers_classnames():
-    """Get classnames of all registered wrappers."""
-    return list(set([k for k in globals() if 'Wrapped' in k]))
-
-
-def make_wrapper_classname(classname):
-    """Return new wrapper classname based on registered classes."""
-    registered_wrappers = get_registered_wrappers_classnames()
-    searches = [re.search(r'Wrapped([0-9]*)\((.*)\)', elt)
-                for elt in registered_wrappers]
-    nums = [search.groups()[0] for search in searches
-            if search is not None and search.groups() is not None]
-    if len(nums) == 0:
-        wrapper_classname = 'Wrapped({})'.format(classname)
-    else:
-        if len(nums) == 1 and nums[0] == '':
-            max_num = 2
-            wrapper_classname = 'Wrapped{}({})'.format(max_num, classname)
-        else:
-            nums = [int(num) for num in nums if num != '']
-            max_num = sorted(nums)[-1] + 1
-            wrapper_classname = 'Wrapped{}({})'.format(max_num, classname)
-    return wrapper_classname
+from .utils.register import (assign, dispatch,  # noqa: E402
+                             get_first_unassigned_wrapper,
+                             make_wrapper_classname, register)
 
 
 class Decorator(object):
@@ -229,6 +188,7 @@ class MethodsDecorator(object):
             __wrapper = self.__class__  # type of class decorator
             __decorator_mapping = mapping  # decorator mapping
             __original_methods = original_methods
+            __assigned = False
 
             def __init__(self, *args, **kwargs):
                 self._decorator_mapping = {
@@ -237,6 +197,7 @@ class MethodsDecorator(object):
                 self.active_decorators = {
                     decorator: True for decorator in self.decorators
                 }
+                self.__class__.__assigned = True
                 cls.__init__(self, *args, **kwargs)
 
             @property
@@ -273,13 +234,9 @@ class MethodsDecorator(object):
                 for k, v in self.__dict__.items():
                     setattr(c_self, k, deepcopy(v, memo))
 
-                new_wrapper_classname = make_wrapper_classname(cls.__name__)
-
                 # Copy self's Wrapper
-                cls_c_self = type(new_wrapper_classname,
-                                  c_self.__class__.__bases__,
-                                  dict(c_self.__class__.__dict__))
-                register(cls_c_self)
+                cls_c_self = get_first_unassigned_wrapper(cls.__name__)
+                assign(cls_c_self)
                 c_self.__class__ = cls_c_self
 
                 # Add back decorators to both self and its copy
@@ -345,6 +302,9 @@ class MethodsDecorator(object):
         Wrapper.__name__ = make_wrapper_classname(cls.__name__)
         Wrapper.__doc__ = cls.__doc__
 
+        # Registering newly created Wrapper class
         register(Wrapper)
+        # Dispatch Wrapper for multiprocessing purpose
+        dispatch(Wrapper, n_dispatch=CONFIG['N_DISPATCH'])
 
         return Wrapper

@@ -8,7 +8,7 @@ import pytest
 from joblib import Parallel, delayed
 
 from pydeco import Decorator
-from pydeco.decorator import unregister, unregister_all
+from pydeco.utils.register import unregister, unregister_all
 from pydeco.utils import PYTHON_VERSION
 
 global logs
@@ -30,15 +30,15 @@ class Decorator1(Decorator):
 
     def __repr__(self):
         """Return the string representation."""
-        return '{} (id={})'.format(self.__class__.__name__, id(self))
+        return '{}[id={}]'.format(self.__class__.__name__, id(self))
 
     def wrapper(self, instance, func, *args, **kwargs):
-        """Wrap input instance method."""
+        """Wrap input instance method with runtime measurement."""
         logs.append({
             self.__class__.__name__: id(self),
             instance.__class__.__name__: id(instance)
         })
-        # print('[Decorator 1] -> decorating...')
+        print('{} decorating {}[id={}]'.format(self, instance, id(instance)))
         instance.cnt_dec_1 += 1  # updating instance cnt for decorator
         return func(instance, *args, **kwargs)
 
@@ -52,15 +52,15 @@ class Decorator2(Decorator):
 
     def __repr__(self):
         """Return the string representation."""
-        return '{} (id={})'.format(self.__class__.__name__, id(self))
+        return '{}[id={}]'.format(self.__class__.__name__, id(self))
 
     def wrapper(self, instance, func, *args, **kwargs):
-        """Wrap input instance method."""
+        """Wrap input instance method with runtime measurement."""
         logs.append({
             self.__class__.__name__: id(self),
             instance.__class__.__name__: id(instance)
         })
-        # print('[Decorator 1] -> decorating...')
+        print('{} decorating {}[id={}]'.format(self, instance, id(instance)))
         instance.cnt_dec_2 += 1  # updating instance cnt for decorator
         return func(instance, *args, **kwargs)
 
@@ -97,6 +97,8 @@ class MyClass():
 
 def test_decoration(verbose=False):
     """Test decoration."""
+    unregister_all()
+
     global logs
     logs = []
 
@@ -148,5 +150,4 @@ def test_decoration(verbose=False):
 
 
 if __name__ == "__main__":
-    # pytest.main([__file__])
-    test_decoration()
+    pytest.main([__file__])

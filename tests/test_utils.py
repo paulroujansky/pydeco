@@ -3,7 +3,9 @@ import pytest
 
 from pydeco import Decorator, MethodsDecorator
 from pydeco.utils import PYTHON_VERSION, is_wrapped, wrapped_class
-
+from pydeco.utils.register import (assign, get_registered_wrappers_classnames,
+                                   get_unassigned_wrappers_classnames,
+                                   unassign, unregister, unregister_all)
 
 # Utils
 # -----------------------------------------------------------------------------
@@ -21,7 +23,6 @@ class Decorator1(object):
         """Call."""
         def wrapped_f(instance, *args, **kwargs):
             """Wrap input instance method with runtime measurement."""
-            # print('[Decorator 1] -> decorating...')
             instance.cnt_dec_1 += 1  # updating instance cnt for decorator
             return f(instance, *args, **kwargs)
         return wrapped_f
@@ -37,7 +38,6 @@ class Decorator2(object):
         """Call."""
         def wrapped_f(instance, *args, **kwargs):
             """Wrap input instance method with runtime measurement."""
-            # print('[Decorator 2] -> decorating...')
             instance.cnt_dec_2 += 1  # updating instance cnt for decorator
             return f(instance, *args, **kwargs)
         return wrapped_f
@@ -81,6 +81,7 @@ def test_python_version():
 
 def test_is_wrapped():
     """Test `is_wrapped` function."""
+    unregister_all()
     # instantiate the base class
     instance = MyClass()
 
@@ -130,6 +131,76 @@ def test_wrapped_class():
     instance_2 = MyClass_deco()
 
     assert wrapped_class(instance_2) is MyClass
+
+
+@pytest.mark.parametrize('n_dispatch', (0, 2, 5, 10))
+def test_class_registration(n_dispatch):
+    """Test class registration."""
+    # instantiate the base class
+    unregister_all()
+    from pydeco.utils.parser import CONFIG
+    CONFIG['N_DISPATCH'] = n_dispatch
+
+    registered_wrappers = get_registered_wrappers_classnames()
+    assert len(registered_wrappers) == 0
+    with pytest.raises(ValueError, match='No assigned wrapper found.'):
+        unassigned_wrappers = get_unassigned_wrappers_classnames('MyClass')
+
+    instance = MyClass()
+
+    # decorate methods
+    MyClass_deco = MethodsDecorator(
+        mapping={
+            Decorator1(name='decorator_1'): ['method_1', 'method_2'],
+            Decorator2(name='decorator_2'): 'method_1'
+        })(MyClass)
+
+    registered_wrappers = get_registered_wrappers_classnames()
+    assert len(registered_wrappers) == n_dispatch + 1
+    unassigned_wrappers = get_unassigned_wrappers_classnames('MyClass')
+    assert len(unassigned_wrappers) == n_dispatch + 1
+
+    # instantiate the wrapped class
+    instance_2 = MyClass_deco()
+
+    registered_wrappers = get_registered_wrappers_classnames()
+    assert len(registered_wrappers) == n_dispatch + 1
+
+    if n_dispatch == 0:
+        with pytest.raises(ValueError, match='No assigned wrapper found.'):
+            unassigned_wrappers = get_unassigned_wrappers_classnames('MyClass')
+    else:
+        unassigned_wrappers = get_unassigned_wrappers_classnames('MyClass')
+        assert len(unassigned_wrappers) == n_dispatch
+        assert 'Wrapped(MyClass)' not in unassigned_wrappers
+
+    from copy import deepcopy
+    # create a copy of "instance_2"
+    if n_dispatch == 0:
+        with pytest.raises(ValueError, match='No assigned wrapper found.'):
+            instance_3 = deepcopy(instance_2)
+    else:
+        instance_3 = deepcopy(instance_2)
+
+    registered_wrappers = get_registered_wrappers_classnames()
+    assert len(registered_wrappers) == n_dispatch + 1
+
+    if n_dispatch != 0:
+        unassigned_wrappers = get_unassigned_wrappers_classnames('MyClass')
+        assert len(unassigned_wrappers) == n_dispatch - 1
+        assert 'Wrapped(MyClass)' not in unassigned_wrappers
+        assert 'Wrapped2(MyClass)' not in unassigned_wrappers
+
+    # Unregistering "instance_2"
+    unregister(instance_2.__class__)
+    registered_wrappers = get_registered_wrappers_classnames()
+    assert len(registered_wrappers) == n_dispatch
+    assert 'Wrapped(MyClass)' not in registered_wrappers
+    if n_dispatch != 0:
+        unassigned_wrappers = get_unassigned_wrappers_classnames('MyClass')
+        assert len(unassigned_wrappers) == n_dispatch - 1
+        assert 'Wrapped(MyClass)' not in unassigned_wrappers
+        assert 'Wrapped2(MyClass)' not in unassigned_wrappers
 
 
 if __name__ == "__main__":
