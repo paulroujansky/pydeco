@@ -6,7 +6,6 @@ from copy import deepcopy
 
 import pytest
 from joblib import Parallel, delayed
-from sklearn.base import BaseEstimator
 
 from pydeco import Decorator, MethodsDecorator
 from pydeco.utils.register import unregister_all
@@ -92,30 +91,6 @@ class MyClass():
     def __repr__(self):
         return '{}(cnt_dec_1={}, cnt_dec_1={})'.format(
             self.__class__.__name__, self.cnt_dec_1, self.cnt_dec_2)
-
-
-class MyEstimator(BaseEstimator):
-    """Custom sickit-learn esimator."""
-
-    def __init__(self, obj=None):
-        self.obj = obj
-
-    def method_1(self, *args, **kwargs):
-        # print('Run method 1')
-        self.obj.method_1()
-
-    def method_2(self, *args, **kwargs):
-        # print('Run method 2')
-        self.obj.method_2()
-
-    def method_3(self, *args, **kwargs):
-        # print('Run method 3')
-        self.obj.method_3()
-
-    def __repr__(self):
-        return '{}.{}(cnt_dec_1={}, cnt_dec_1={})'.format(
-            self.__class__.__name__, self.obj.__class__.__name__,
-            self.obj.cnt_dec_1, self.obj.cnt_dec_2)
 
 
 # Define custom function
