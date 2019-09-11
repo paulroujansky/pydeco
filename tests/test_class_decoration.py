@@ -98,7 +98,6 @@ class MyClass():
 
 def myfunc(i, instance, copy, iter_process, verbose=True):
     """In the title."""
-    print('MYFUNC')
     # keep track of iterations within each PID
     pid = os.getpid()  # get current process ID
 

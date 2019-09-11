@@ -56,7 +56,12 @@ class Decorator(object):
         if not is_wrapped(instance):
             return True
         else:
-            return instance.is_decorator_active(self.__class__.__name__)
+            class_name = self.__class__.__name__
+            # decorator not used in :class:`MethodsDecorator` context
+            if class_name not in instance.decorators:
+                return True
+            else:
+                return instance.is_decorator_active(class_name)
 
     def __call__(self, func):
         """Call."""
